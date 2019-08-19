@@ -4,23 +4,26 @@ import imaplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+GMAIL_SMTP = "smtp.gmail.com"
+GMAIL_SMTP_PORT = 587
+GMAIL_IMAP = "imap.gmail.com"
+
 
 class Mail:
-    def __init__(self, login='login@gmail.com',
-                 password='qwerty',
+    def __init__(self, login,
+                 password,
+                 recipients,
                  subject='Subject',
-                 recipients='vasya@email.com, petya@email.com',
-                 message='Message', header=None):
+                 message='Message',
+                 header=None):
         self.login = login
         self.password = password
         self.subject = subject
         self.recipients = recipients
         self.message = message
         self.header = header
-        self.GMAIL_SMTP = "smtp.gmail.com"
-        self.GMAIL_IMAP = "imap.gmail.com"
 
-    def send_message(self):
+    def send_message(self, smtp_address=GMAIL_SMTP, smtp_port=GMAIL_SMTP_PORT):
         # send message
         msg = MIMEMultipart()
         msg['From'] = self.login
@@ -28,7 +31,7 @@ class Mail:
         msg['Subject'] = self.subject
         msg.attach(MIMEText(self.message))
 
-        smtp_client = smtplib.SMTP(self.GMAIL_SMTP, 587)
+        smtp_client = smtplib.SMTP(smtp_address, smtp_port)
         # identify ourselves to smtp gmail client
         smtp_client.ehlo()
         # secure our email with tls encryption
@@ -41,9 +44,9 @@ class Mail:
         smtp_client.quit()
         # send end
 
-    def receive(self):
+    def receive(self, imap_address=GMAIL_IMAP):
         # receive
-        mail = imaplib.IMAP4_SSL(self.GMAIL_IMAP)
+        mail = imaplib.IMAP4_SSL(imap_address)
         mail.login(self.login, self.password)
         mail.list()
         mail.select("inbox")
@@ -59,4 +62,4 @@ class Mail:
 
 
 if __name__ == '__main__':
-    letter = Mail()
+    letter = Mail('login@gmail.com', 'qwerty', ('vasya@email.com', 'petya@email.com'))
